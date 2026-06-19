@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
       if (ok) {
         Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const DashboardScreen()));
+    MaterialPageRoute(builder: (_) => const OrdersScreen()));
       } else {
         setState(() => _error = 'Identifiants ou URL incorrects.');
       }
