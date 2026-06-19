@@ -1,0 +1,63 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Sauvegarder les fichiers Android personnalises
+        run: |
+          mkdir -p /tmp/ois_backup/xml /tmp/ois_backup/values
+          cp android/app/src/main/AndroidManifest.xml /tmp/ois_backup/AndroidManifest.xml
+          cp android/app/src/main/res/xml/network_security_config.xml /tmp/ois_backup/xml/network_security_config.xml
+          cp android/app/src/main/res/values/styles.xml /tmp/ois_backup/values/styles.xml
+
+      - name: Generer le squelette natif
+        run: flutter create --org com.onlineinksolutions --project-name ois_orders_mobile .
+
+      - name: Restaurer les fichiers Android personnalises
+        run: |
+          cp /tmp/ois_backup/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+          mkdir -p android/app/src/main/res/xml android/app/src/main/res/values
+          cp /tmp/ois_backup/xml/network_security_config.xml android/app/src/main/res/xml/network_security_config.xml
+          cp /tmp/ois_backup/values/styles.xml android/app/src/main/res/values/styles.xml
+
+      - name: Forcer minSdkVersion 29
+        run: |
+          GRADLE_FILE=android/app/build.gradle
+          if [ -f android/app/build.gradle.kts ]; then GRADLE_FILE=android/app/build.gradle.kts; fi
+          sed -i -E 's/minSdkVersion[ =]+[a-zA-Z0-9.]+/minSdkVersion 29/g; s/minSdk[ =]+[a-zA-Z0-9.]+/minSdk = 29/g' "$GRADLE_FILE" || true
+          sed -i -E 's/minSdk = flutter.minSdkVersion/minSdk = 29/g' "$GRADLE_FILE" || true
+          echo "----- $GRADLE_FILE -----"
+          cat "$GRADLE_FILE"
+
+      - name: Dependances
+        run: flutter pub get
+
+      - name: Build APK release
+        run: flutter build apk --release
+
+      - name: Upload app-release.apk
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
