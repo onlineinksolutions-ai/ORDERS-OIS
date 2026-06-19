@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Ce fichier impose HTTPS pour toutes les connexions de l'app (bonne pratique
+  de securite). Si vous testez temporairement sur un sous-domaine SANS SSL
+  actif (deconseille en production), vous devrez ajouter un domain-config
+  cleartextTrafficPermitted="true" ici. Sur Hostinger, le SSL gratuit
+  (Let's Encrypt) est generalement actif par defaut : utilisez-le.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

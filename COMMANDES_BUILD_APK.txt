@@ -1,0 +1,119 @@
+================================================================
+ OIS ORDERS MOBILE - COMMANDES BUILD APK (a executer chez vous)
+================================================================
+
+Je ne peux pas compiler l'APK dans cet environnement : pas de SDK
+Android, pas de Gradle, pas d'acces reseau sortant pour telecharger
+les dependances. Voici la procedure EXACTE a executer sur votre poste
+(Windows/Mac/Linux avec Flutter installe) pour obtenir
+app-release.apk en moins de 10 minutes.
+
+----------------------------------------------------------------
+PREREQUIS (une seule fois)
+----------------------------------------------------------------
+1. Installer Flutter SDK : https://docs.flutter.dev/get-started/install
+2. Installer Android Studio (fournit le SDK Android + emulateur)
+3. Verifier l'installation :
+   flutter doctor
+   -> corrigez les "✗" affiches (licences Android notamment) :
+   flutter doctor --android-licenses
+
+----------------------------------------------------------------
+ETAPE 1 - Decompresser le ZIP source fourni
+----------------------------------------------------------------
+   unzip ois_orders_mobile.zip
+   cd ois_orders_mobile
+
+----------------------------------------------------------------
+ETAPE 2 - Generer le squelette natif Android
+----------------------------------------------------------------
+Dans le dossier ois_orders_mobile, ATTENTION : flutter create va
+generer de nouveaux fichiers SANS toucher a votre lib/ existant,
+mais va recreer android/app/src/main/AndroidManifest.xml par defaut
+(vide de nos permissions). Procedez ainsi pour ne rien perdre :
+
+   # 2a. Sauvegardez nos 3 fichiers Android personnalises
+   mkdir /tmp/ois_android_backup
+   cp android/app/src/main/AndroidManifest.xml /tmp/ois_android_backup/
+   cp android/app/src/main/res/xml/network_security_config.xml /tmp/ois_android_backup/
+   cp android/app/src/main/res/values/styles.xml /tmp/ois_android_backup/
+
+   # 2b. Generer le squelette natif complet
+   flutter create --org com.onlineinksolutions --project-name ois_orders_mobile .
+
+   # 2c. Restaurer nos fichiers personnalises (ECRASE les versions par defaut)
+   cp /tmp/ois_android_backup/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+   mkdir -p android/app/src/main/res/xml
+   cp /tmp/ois_android_backup/network_security_config.xml android/app/src/main/res/xml/
+   cp /tmp/ois_android_backup/styles.xml android/app/src/main/res/values/styles.xml
+
+----------------------------------------------------------------
+ETAPE 3 - minSdkVersion (Android 10+)
+----------------------------------------------------------------
+Ouvrez android/app/build.gradle (ou build.gradle.kts selon version
+Flutter), cherchez minSdkVersion (ou minSdk) et mettez :
+   minSdkVersion 29
+(29 = Android 10. Vous pouvez descendre a 24 si vous voulez supporter
+des appareils plus anciens, mais le cahier des charges demande 10+.)
+
+----------------------------------------------------------------
+ETAPE 4 - Dependances
+----------------------------------------------------------------
+   flutter pub get
+
+----------------------------------------------------------------
+ETAPE 5 - Test rapide (optionnel mais recommande)
+----------------------------------------------------------------
+Branchez un telephone Android (debogage USB active) ou lancez un
+emulateur, puis :
+   flutter run
+Testez login + liste commandes avant de generer l'APK final.
+
+----------------------------------------------------------------
+ETAPE 6 - BUILD APK RELEASE
+----------------------------------------------------------------
+   flutter build apk --release
+
+Resultat :
+   build/app/outputs/flutter-apk/app-release.apk
+
+Cet APK est signe avec la cle de debug par defaut de Flutter : il
+s'installe directement sur un telephone (sources inconnues activees)
+mais N'EST PAS publiable sur le Play Store en l'etat. Pour un usage
+interne (votre cas), c'est suffisant.
+
+----------------------------------------------------------------
+ETAPE 7 - Installer sur le telephone
+----------------------------------------------------------------
+Option A - cable USB :
+   adb install build/app/outputs/flutter-apk/app-release.apk
+
+Option B - sans cable :
+   Transferez app-release.apk par email/drive/USB, ouvrez le fichier
+   sur le telephone, autorisez "Installer des applications inconnues"
+   pour l'app utilisee (ex: Fichiers, Gmail), puis installez.
+
+----------------------------------------------------------------
+SI VOUS VOULEZ UNE VRAIE SIGNATURE (cle perso, pas debug)
+----------------------------------------------------------------
+Generez un keystore :
+   keytool -genkey -v -keystore ois-release-key.jks -keyalg RSA \
+     -keysize 2048 -validity 10000 -alias ois
+
+Creez android/key.properties :
+   storePassword=VOTRE_MDP
+   keyPassword=VOTRE_MDP
+   keyAlias=ois
+   storeFile=../ois-release-key.jks
+
+Puis suivez la doc officielle Flutter "Sign the app" :
+https://docs.flutter.dev/deployment/android#signing-the-app
+(modification de android/app/build.gradle pour pointer vers key.properties)
+
+----------------------------------------------------------------
+COMPATIBILITE CONFIRMEE
+----------------------------------------------------------------
+- PrestaShop : 8.1.7 (colonnes SQL verifiees contre ce schema)
+- PHP serveur : 8.x (typage strict declare(strict_types=1))
+- Android (app) : minSdkVersion 24+, recommande 29 (Android 10+)
+- MySQL/MariaDB : standard Hostinger
