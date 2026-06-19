@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'services/api_service.dart';
 import 'screens/login_screen.dart';
-import 'screens/dashboard_screen.dart';
+import 'screens/orders_screen.dart';
 
 // Couleurs Online Ink Solutions
 class OIS {
@@ -65,7 +65,7 @@ class OISApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: base,
       home: ApiService.isLoggedIn
-          ? const DashboardScreen()
+          ? const OrdersScreen()
           : const LoginScreen(),
     );
   }
