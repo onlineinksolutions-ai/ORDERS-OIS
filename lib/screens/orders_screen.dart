@@ -90,6 +90,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
         if (_firstLoadDone && _lastOrderRef.isNotEmpty && newRef != _lastOrderRef) {
           HapticFeedback.heavyImpact();
           SystemSound.play(SystemSoundType.alert);
+          await NotificationService.show(
+  '🔔 Nouvelle commande',
+  '$newRef - $customer - $total $currency',
+);
 
           if (mounted) {
             final customer = (list.first['customer'] ?? '').toString();
