@@ -277,30 +277,56 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Widget _productRow(Map<String, dynamic> p, String cur) {
-    final name = (p['name'] ?? '').toString();
-    final ref = (p['reference'] ?? '').toString();
-    final qty = (p['quantity'] ?? '').toString();
-    final total = (p['total'] ?? '').toString();
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name,
-                    style: const TextStyle(fontWeight: FontWeight.w500)),
-                Text('Ref: $ref  x$qty',
-                    style:
-                        const TextStyle(color: Colors.black54, fontSize: 12)),
-              ],
-            ),
+  final name = (p['name'] ?? '').toString();
+  final ref = (p['reference'] ?? '').toString();
+  final qty = (p['quantity'] ?? '').toString();
+  final total = (p['total'] ?? '').toString();
+  final imageUrl = (p['image_url'] ?? '').toString();
+
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: imageUrl.isEmpty
+              ? Container(
+                  width: 58,
+                  height: 58,
+                  color: const Color(0xFFF1F1F1),
+                  child: const Icon(Icons.image_not_supported, size: 24),
+                )
+              : Image.network(
+                  imageUrl,
+                  width: 58,
+                  height: 58,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: 58,
+                    height: 58,
+                    color: const Color(0xFFF1F1F1),
+                    child: const Icon(Icons.image_not_supported, size: 24),
+                  ),
+                ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 3),
+              Text(
+                'Ref: $ref  x$qty',
+                style: const TextStyle(color: Colors.black54, fontSize: 12),
+              ),
+            ],
           ),
-          Text('$total $cur',
-              style: const TextStyle(fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
-  }
+        ),
+        const SizedBox(width: 8),
+        Text('$total $cur', style: const TextStyle(fontWeight: FontWeight.w600)),
+      ],
+    ),
+  );
 }
