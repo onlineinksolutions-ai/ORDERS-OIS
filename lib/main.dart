@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'services/api_service.dart';
+import 'services/notification_service.dart';
 import 'screens/login_screen.dart';
 import 'screens/orders_screen.dart';
 
@@ -16,6 +17,7 @@ Future<void> main() async {
 
   try {
     await ApiService.load();
+    await NotificationService.init();
   } catch (_) {
     // Ne jamais bloquer le demarrage de l'application.
   }
