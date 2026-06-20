@@ -1,23 +1,48 @@
-import 'api_service.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-/// Version stable sans plugins natifs.
-/// Les notifications background ont ete desactivees pour eviter le crash au demarrage.
-/// L'application fonctionne normalement: login, dashboard, commandes, details, WhatsApp/appel/email.
 class NotificationService {
-  static Future<void> init() async {}
+  static final FlutterLocalNotificationsPlugin _plugin =
+      FlutterLocalNotificationsPlugin();
+
+  static Future<void> init() async {
+    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const settings = InitializationSettings(android: android);
+
+    await _plugin.initialize(settings);
+
+    await _plugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
+  }
 
   static Future<void> registerBackgroundPolling() async {}
 
-  static Future<void> show(String title, String body) async {}
+  static Future<void> show(String title, String body) async {
+    const androidDetails = AndroidNotificationDetails(
+      'ois_orders_channel',
+      'Commandes OIS',
+      channelDescription: 'Notifications des nouvelles commandes',
+      importance: Importance.max,
+      priority: Priority.high,
+      playSound: true,
+      enableVibration: true,
+    );
 
-  static Future<int> getLastSeen() async {
-    return 0;
+    const details = NotificationDetails(android: androidDetails);
+
+    await _plugin.show(
+      DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      title,
+      body,
+      details,
+    );
   }
+
+  static Future<int> getLastSeen() async => 0;
 
   static Future<void> setLastSeen(int id) async {}
 
-  static Future<void> checkNow() async {
-    await ApiService.load();
-    if (!ApiService.isLoggedIn) return;
-  }
+  static Future<void> checkNow() async {}
 }
