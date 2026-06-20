@@ -92,7 +92,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           SystemSound.play(SystemSoundType.alert);
           await NotificationService.show(
   '🔔 Nouvelle commande',
-  '$newRef - $customer - $total $currency',
+  '${newRef} - ${(list.first['customer'] ?? '').toString()} - ${(list.first['total'] ?? '').toString()} ${(list.first['currency'] ?? 'DH').toString()}',
 );
 
           if (mounted) {
